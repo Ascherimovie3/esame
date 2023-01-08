@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Il mio profilo{% endblock %}
+{% block profilo_link %}active{% endblock %}
+
+{% block content %}
+    <h2> {{user.type |e}} </h2>
+    <img src="{{ url_for('static', filename=user.usrimg) }}" class="rounded-circle float-end" alt="Questa è l\'immagine di profilo">
+    <ul class="list-inline">
+        <li class="list-inline-item"> <h4>Nickname:</h4> </li>
+        <li class="list-inline-item"> <p>{{user.nickname |e }}<p> </li>
+    </ul>
+    <div class="container text-center">
+        <h4> I podcast che seguo: </h4>
+        <div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3">
+            {% for followed_podcast in followed_podcasts %}
+            <div class="col">
+                <div class="p-3 border bg-light">
+                    <img class="rounded" src="{{ url_for('static', filename=followed_podcast.podcastimg) }}" height="5%" width="5%" alt="Questa è l\'immagine di copertina del podcast che seguo">
+                    <h4> <a href="{{ url_for('podcast', pid=followed_podcast.pid) }}">{{ followed_podcast.title |e }}</a> </h4>
+                    <p>by {{followed_podcast.nickname |e }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% if user.type=="creatore" %}
+    <div class="container text-center">
+        <h4> I miei podcast: </h4>
+        <div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3">
+            {% for my_podcast in my_podcasts %}
+            <div class="col">
+                <div class="p-3 border bg-light">
+                    <img class="w-100 p-2" src="{{ url_for('static', filename=my_podcast.podcastimg) }}" alt="Questa è l\'immagine di copertina del mio podcast">
+                    <h4> <a href="{{ url_for('podcast', pid=my_podcast.pid) }}">{{ my_podcast.title |e }}</a> </h4>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}

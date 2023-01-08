@@ -1,0 +1,133 @@
+body {
+    background-color: dimgrey;
+    padding-left: 2%;
+    padding-right: 2%;
+    margin-top: 2%;
+}
+
+#myheader {
+    background-color: darkgrey;
+    border: 2px solid;
+    width: 100%;
+}
+
+#myaside1 {
+    float: left;
+    flex: 1;
+    margin-top: 1.7%;
+}
+
+#main {
+    float: left;
+    flex: 4;
+}
+
+#myaside2 {
+    float: right;
+    flex: 1;
+    margin-top: 1.7%;
+}
+
+.mynavbar {
+    height: 10rem;
+    width: 100%;
+}
+
+a:link {
+    color:rgb(209, 24, 117);
+}
+
+a:visited {
+    color:rgb(108, 16, 62);
+}
+
+a:hover {
+    color: rgb(255, 132, 193);
+}
+
+#myaside1 div {
+    background-color: rgb(255, 201, 228);
+    border: 2px solid;
+    padding-top: 3%;
+    padding-bottom: 3%;
+}
+
+#myaside2 div {
+    background-color: rgb(255, 201, 228);
+    border: 2px solid;
+    padding-top: 3%;
+    padding-bottom: 3%;
+}
+
+article {
+    border: 2px solid;
+    background-color:  darkgrey;
+}
+
+.usrimg {
+    display: inline;
+    height: 80px;
+    vertical-align: middle;
+    margin: 0.5rem 0.5rem 0.5rem 0rem;
+}
+
+.date {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color: rgb(255, 132, 193);
+}
+
+.blockquote {
+    font-family:fantasy;
+}
+
+.blockquote-footer {
+    color: rgb(255, 132, 193);
+}
+
+.mybutton {
+    background-color: rgb(209, 24, 117);
+    border: none;
+    border-radius: 50%;
+    bottom: 30px;
+    color: white;
+    height: 60px;
+    position: fixed;
+    right: 30px;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    width: 60px;
+}
+
+.mybutton:hover {
+    background-color: rgb(255, 132, 193);
+    color: white;
+}
+
+@media (max-width: 991.98px) {
+
+    #myaside1, #myaside2 {
+        margin-bottom: none;
+    }
+
+    #myaside1 ul {
+        display: flex;
+        justify-content: space-between;
+        list-style-type: none;
+        padding: 0rem 1rem;
+    }
+
+    #myaside2 ul {
+        display: flex;
+        justify-content: space-between;
+        list-style-type: none;
+        padding: 0rem 1rem;
+    }
+
+    aside li {
+        display: inline;
+        list-style-type: none;
+        padding: 0em;
+        width: fit-content;
+    }
+}

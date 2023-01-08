@@ -1,0 +1,172 @@
+DOMANDE
+perché non funziona il dropdown di podcast in home.html?
+perché il form per modificare è trasparente ma i campi da compilare è come se comparissero?
+perché il flag perde il suo valore uscito dal for in podcast.html e in home.html?
+perché 'sqlite3.Row object' has no attribute 'podcast'
+
+
+pagina home con navbar, main e due aside
+- la navbar contiene (a sx) nome app, link a home, link a menù a tendina dei podcast, la mia playlist, button di ricerca, (a dx) button per il login/logout
+  - il menù a tendina contiene link alle serie (serie.html), nella pagina ci sono gli episodi delle serie selezionata
+  - nome app: Pod-must, i *must* dei podcast
+
+- l'aside contiene (a sx) il podcast più amato (con più followers) e (a dx) la lista dei creatori
+
+- il main contiene tutti gli episodi 
+
+- simboli: search/search-heart, power (per il logout), plus-circle (per aggiungere alla playlist)/check-circle, music-note (per il titolo), 
+  chat (per i commenti), arrow-through-heart (per mi piace)/arrow-through-heart-fill, pencil (per modificare), trash (per eliminare)
+
+DATABASE esame.db 
+
+    USER
+    - uid
+    - type (creatore, ascoltatore)
+    - nickname
+    - password
+    - usrimg
+
+    PODCAST 
+    - pid
+    - title
+    - description
+    - category
+    - podcastimg
+    - creator (references uid from USER)
+    - num_episodes
+
+    EPISODE 
+    - eid 
+    - audio
+    - title
+    - description
+    - data 
+    - podcast (references pid from PODCAST)
+    - ?creator (references uid from USER)?
+    - comment (references cid from COMMENT) 
+
+    PLAYLIST 
+    - title
+    - description
+    - uid
+    - ?pid?
+    - eid
+
+    COMMENT 
+    - cid
+    - text
+    - data
+    - uid
+    - eid 
+
+ESEMPI DI PODCAST E DI EPISODI
+- 80 voglia di anni 90 (perchè la musica anni 80 è la migliore, le migliori canzoni anni 90)
+- animali più pericolosi (tarantole, serpenti, orche)
+
+POSSIBILI PROBLEMI
+nickname (con @ o senza @)
+in home.html current_user.type=="creatore" 
+autenticazione user in podcast.html
+{% set flag=0 %} in home
+controllare uid
+non c'è import session in app.py
+due join nel from della prima select in dao.py
+return redirect url for podcast in app.py def follow
+
+COSA DEVO AGGIUNGERE 
+bottome aggiungi episodio + format etc
+le varie robe di modifica e rimozione
+
+SE VOLESSI ANCORA METTERE PLAYLIST...
+
+in podcast.html e in home.html <a href="{{ url_for('add', id=episode.eid) }}"> <i class="bi bi-plus-circle"></i> </a>
+
+in base.html <li class="nav-item">
+                <a class="nav-link {% block playlist_link %}{% endblock %}" href="{{ url_for('playlist') }}"> La mia playlist </a>
+             </li>
+
+in dao.py  
+def get_playlist():
+    conn = sqlite3.connect('database/esame.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    sql = 'SELECT PLAYLIST.plid, PLAYLIST.episode, PLAYLIST.user, PODCAST.podcastimg, USER.nickname, EPISODE.audio, EPISODE.title, EPISODE.description\
+            FROM PLAYLIST, USER, EPISODE, PODCAST\
+            WHERE PLAYLIST.user=USER.id AND PLAYLIST.episode=EPISODE.eid AND PLAYLIST.podcast=PODCAST.pid'
+    cursor.execute(sql)
+    playlist = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return playlist
+
+in app.py
+@app.route('/playlist')
+def playlist():
+    playlist = dao.get_playlist()
+
+    return render_template('playlist.html', playlist=playlist)
+
+
+playlist.html
+{% extends "base.html" %}
+{% block title %}La mia playlist{% endblock %}
+{% block playlist_link %}active{% endblock %}
+
+{% block content %} 
+<figure class="text-center">
+    <blockquote class="blockquote">
+        <p>La mia playlist</p>
+    </blockquote>
+    <figcaption class="blockquote-footer"> Tutto ciò che mi piace e che non voglio dimenticare </figcaption>
+</figure>
+<article class="row border border-2 border-dark p-2 mx-2 my-4">
+    {% if current_user.is_authenticated %}
+    {% for element in playlist %} 
+        {% if element.user==current_user.id %}
+        <div class="col-lg-9 col-md-6 col-sm-12">
+            {% if element.podcastimg %}
+                <img class="w-100 p-2" src="{{ url_for('static', filename=element.podcastimg) }}" alt="...">
+            {% endif %}
+            <p> by {{element.nickname}}</p>
+            <section class="d-flex align-items-center mt-2 mb-4">
+                <figure>
+                    <figcaption> {{ element.title |e }} </figcaption>
+                    <audio controls>
+                        <source src="{{ url_for('static', filename=element.audio) }}" type="audio/ogg"> </source>
+                        <source src="{{ url_for('static', filename=element.audio) }}" type="audio/mpeg"> </source>
+                    </audio>
+                </figure>
+                <div class="flex-grow-1 text-end">
+                    <p class="date"> {{ element.data |e }} </p>
+                </div>
+            </section>
+            <p> {{ element.description |e }} </p>
+
+            <div class="interaction">
+                <a href="{{ url_for('remove_episode', eid=element.eid, plid=element.plid) }}"> <i class="bi bi-trash3"></i> </a>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+    {% endif %}
+
+    <a href="{{url_for('home')}}" type="button" class="btn btn-outline-dark">Home</a>
+</article>
+{% endblock %}
+
+
+<div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
+                            <ul class="navbar-nav">
+                                <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="/" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Podcast </a>
+                                <ul class="dropdown-menu dropdown-menu-dark">
+                                    {% for podcast in podcasts %}
+                                    <li><a class="dropdown-item" href="{{ url_for('podcast', pid=podcast.pid) }}">{{ podcast.title |e }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                                </li>
+                            </ul>
+                        </div>

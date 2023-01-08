@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block home_link %}active{% endblock %}
+
+{% block content %}
+<aside id="myaside1" class="col-lg-3 col-md-12">
+    <div>
+        <p> Il podcast più amato del momento è </p>
+        <div>
+            <img class="rounded" src="{{ url_for('static', filename=mostloved.podcastimg) }}" alt="Questa è l'immagine del podcast più amato">
+            <p> {{ mostloved.title |e }} </p>
+            <p> by {{mostloved.nickname |e }} </p>
+        </div>
+    </div>
+</aside>
+
+<div id="main" class="col-lg-9 col-md-12">
+    {% for episode in episodes %}
+    <article class="row border border-2 border-dark p-2 mx-2 my-4">
+        <div class="col-lg-3 col-md-6 col-sm-12 px-0">
+            <img class="rounded w-100 p-2" src="{{ url_for('static', filename=episode.podcastimg) }}" alt="Questa è l'immagine del podcast cui appartiene l'episodio">
+            <p> @{{ episode.nickname |e }} </p>
+
+            {% if current_user.is_authenticated %}
+                {% set flag=0 %}
+                {% for follower in followers %} 
+                    {% if episode.podcast==follower.podcast and current_user.id==follower.user and flag==0 %}
+                    {% set flag=1 %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if flag==0 %}   
+                <a href="{{ url_for('follow', pid=episode.podcast, id=current_user.id) }}"> <i class="bi bi-person-plus"></i> </a>
+                {% else %}
+                <i class="bi bi-person-check"></i>
+                {% endif %}
+            {% endif %}
+        </div>
+        <div class="col-lg-9 col-md-6 col-sm-12">
+            <section class="d-flex align-items-center mt-2 mb-4">
+                <figure>
+                    <figcaption> {{ episode.title |e }} </figcaption>
+                    <audio controls>
+                        <source src="{{ url_for('static', filename=episode.audio) }}" type="audio/ogg"> </source>
+                        <source src="{{ url_for('static', filename=episode.audio) }}" type="audio/mpeg"> </source>
+                    </audio>
+                </figure>
+                <div class="flex-grow-1 text-end">
+                    <p class="date"> {{ episode.data |e }} </p>
+                </div>
+            </section>
+            <p> {{ episode.description |e }} </p>
+
+            {% if current_user.is_authenticated %}
+            <div class="interaction">
+                
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#episode{{episode.eid}}">
+                    <i class="bi bi-chat"></i>
+                </button>
+                <!-- Modal -->
+                <div class="modal fade" id="episode{{episode.eid}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Commenti</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                {% for comment in comments %}
+                                {% if comment.episode==episode.eid %}
+                                <section class="d-flex align-items-top mt-2 mb-4">
+                                    <div>
+                                        <h5 class="username">{{ comment.nickname |e }}</h5>
+                                    </div>
+                                    <div class="flex-grow-1 text-start px-4">
+                                        <p>{{ comment.text |e }}</p>
+                                    </div>
+                                    <div class="flex-grow-1 text-end">
+                                        <p>{{ comment.data |e }}</p>
+                                    </div>
+                                </section>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                            <div class="modal-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            {% endif %}
+        </div>
+
+    </article>
+    {% endfor %}
+</div>
+
+{% if current_user.is_authenticated and current_user.type=="creatore" %}
+<button type="button" class="mybutton" data-bs-toggle="modal" data-bs-target="#createModal"> NUOVO PODCAST </button>
+<div class="modal fade" id="createModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Crea un nuovo podcast!</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/podcasts/new" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <fieldset disabled>
+                        <div class="mb-3">
+                            <label for="usrnameTextInput" class="form-label">Username</label>
+                            <input type="text" id="usrnameTextInput" name="nickname" class="form-control" value="@{{current_user.nickname}}">
+                        </div>
+                    </fieldset>
+                    <div class="mb-3">
+                        <label for="postTextarea" class="form-label">Titolo</label>
+                        <textarea class="form-control" id="postTextarea" name="title" rows="3" placeholder="Inserisci un titolo per il tuo podcast" required minlength="5" maxlength="30"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="postTextarea" class="form-label">Descrizione</label>
+                        <textarea class="form-control" id="postTextarea" name="description" rows="3" placeholder="Inserisci una descrizione per il tuo podcast" required minlength="20" maxlength="150"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <select class="form-select" aria-label="Default select example" name="category">
+                            <option selected>Scegli una categoria</option>
+                            <option value="Natura">Natura</option>
+                            <option value="Animali">Animali</option>
+                            <option value="Musica">Musica</option>
+                            <option value="Arte">Arte</option>
+                            <option value="Scienza">Scienza</option>
+                            <option value="Viaggi">Viaggi</option>
+                            <option value="Sentimenti">Sentimenti</option>
+                            <option value="Tecnologia">Tecnologia</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="imageFile" class="form-label">Immagine di copertina</label>
+                        <input class="form-control" name="podcastimg" type="file" id="imageFile">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="submit" class="btn btn-primary">Crea podcast</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %} 
+<aside id="myaside2" class="col-lg-3 col-md-12">
+    {% for category in categories %} 
+    <p> <a href="{{ url_for('category', cat=category) }}"> {{ category }} </a> </p>
+    {% endfor %}
+</aside>
+{% endblock %}
